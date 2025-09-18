@@ -1,1 +1,74 @@
 
+import pygame
+import numpy as np
+import random
+from sys import exit
+
+pygame.init()
+
+def draw_board(board, row_hints, col_hints):
+    for i in range(5):
+        for j in range(5):
+            if board[i][j] == -1:
+                print("V", end=" ")
+            else:
+                print(board[i][j], end=" ")
+        
+
+def generate_board():
+    board = np.zeros((5,5), dtype=int)
+    for i in range(5):
+        for j in range(5):
+            rand = random.random()
+            if rand < 0.1:
+                board[i][j] = -1  # Voltorb
+            elif rand < 0.4:
+                board[i][j] = 1   # 1 point
+            elif rand < 0.7:
+                board[i][j] = 2   # 2 points
+            else:
+                board[i][j] = 3   # 3 points    
+    return board
+
+def generate_hint(board):
+    row_hints = []
+    col_hints = []
+    for i in range(5):
+        row_voltorbs = np.sum(board[i] == -1)
+        row_points = np.sum(board[i][board[i] > 0])
+        row_hints.append((row_voltorbs, row_points))
+        
+        col_voltorbs = np.sum(board[:,i] == -1)
+        col_points = np.sum(board[:,i][board[:,i] > 0])
+        col_hints.append((col_voltorbs, col_points))
+    return row_hints, col_hints
+
+
+currentBoard = generate_board()
+rowKeys, colKeys = generate_hint(currentBoard)
+
+class revealedTile:
+    def __init__(self, x, y, value):
+        self.x = x
+        self.y = y
+        self.value = value
+        self.revealed = False
+
+gameFont = pygame.font.Font(None, 30)
+
+screen = pygame.display.set_mode((288,288))
+pygame.display.set_caption("Voltorb Flip")
+clock = pygame.time.Clock() # Initialize clock for controlling frame rate
+
+board_surface = pygame.image.load("Graphics/emptyBoard.png")
+pointRow = gameFont.render("1", False, (0, 0, 0))
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+    screen.blit(board_surface, (0, 0))         # Sprite rendering
+    screen.blit(pointRow, (50, 50))
+    clock.tick(30)  # Limit frame rate to 30 FPS
+    pygame.display.update()
