@@ -16,16 +16,30 @@ def generate_new_board(size):
                 board[i][j] = 3   # 3 points    
     return board
 
-def generate_hint(board):
-    row_hints = []
-    col_hints = []
+def generate_keys(board):
+    row_keys = []
+    col_keys = []
     size = len(board[0])
     for i in range(size):
         row_voltorbs = np.sum(board[:,i] == -1)
         row_points = np.sum(board[:,i][board[:,i] > 0])
-        row_hints.append((row_voltorbs, row_points))
+        row_keys.append((row_voltorbs, row_points))
         
         col_voltorbs = np.sum(board[i] == -1)
         col_points = np.sum(board[i][board[i] > 0])
-        col_hints.append((col_voltorbs, col_points))
-    return col_hints, row_hints
+        col_keys.append((col_voltorbs, col_points))
+    return col_keys, row_keys
+
+
+def draw_keys(col_keys, row_keys, GAME_SIZE, font, screen):
+    for i,(voltorb, score) in enumerate(col_keys):
+        voltorbCount = font.render(str(voltorb), True, (0,0,0))
+        pointTotal = font.render(str(score).zfill(2), True, (0,0,0))
+        screen.blit(voltorbCount, (i * 47 + 34, (GAME_SIZE) * 47 + 26))  # Positioning key in the right place
+        screen.blit(pointTotal, (i * 47 + 22, (GAME_SIZE) * 47 + 6))
+
+    for i,(voltorb, score) in enumerate(row_keys):
+        voltorbCount = font.render(str(voltorb), True, (0,0,0))
+        pointTotal = font.render(str(score).zfill(2), True, (0,0,0))
+        screen.blit(voltorbCount, ((GAME_SIZE) * 47 + 30, i*47 + 27))  # Positioning key in the right place
+        screen.blit(pointTotal, ((GAME_SIZE) * 47 + 20, i*47+7))
