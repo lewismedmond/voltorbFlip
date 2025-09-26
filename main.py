@@ -6,7 +6,7 @@ from tile import Tile
 
 pygame.init()
 
-GAME_SIZE = 4
+GAME_SIZE = 7
         
 currentBoard = generate_new_board(GAME_SIZE)
 colKeys, rowKeys = generate_hint(currentBoard)
@@ -38,8 +38,8 @@ for i,(voltorb, score) in enumerate(colKeys):
 for i,(voltorb, score) in enumerate(rowKeys):
     voltorbCount = gameFont.render(str(voltorb), True, (0,0,0))
     pointTotal = gameFont.render(str(score).zfill(2), True, (0,0,0))
-    screen.blit(voltorbCount, ((GAME_SIZE) * 47 + 35, i*47 + 27))  # Positioning key in the right place
-    screen.blit(pointTotal, ((GAME_SIZE) * 47 + 13, i*47+7))
+    screen.blit(voltorbCount, ((GAME_SIZE) * 47 + 30, i*47 + 27))  # Positioning key in the right place
+    screen.blit(pointTotal, ((GAME_SIZE) * 47 + 20, i*47+7))
 
 
 
