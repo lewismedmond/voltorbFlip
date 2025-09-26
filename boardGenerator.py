@@ -1,10 +1,10 @@
 import numpy as np
 import random
 
-def generate_new_board():
-    board = np.zeros((5,5), dtype=int)
-    for i in range(5):
-        for j in range(5):
+def generate_new_board(size):
+    board = np.zeros((size,size), dtype=int)
+    for i in range(size):
+        for j in range(size):
             rand = random.random()
             if rand < 0.3:
                 board[i][j] = -1  # Voltorb
@@ -19,12 +19,13 @@ def generate_new_board():
 def generate_hint(board):
     row_hints = []
     col_hints = []
-    for i in range(5):
-        row_voltorbs = np.sum(board[i] == -1)
-        row_points = np.sum(board[i][board[i] > 0])
+    size = len(board[0])
+    for i in range(size):
+        row_voltorbs = np.sum(board[:,i] == -1)
+        row_points = np.sum(board[:,i][board[:,i] > 0])
         row_hints.append((row_voltorbs, row_points))
         
-        col_voltorbs = np.sum(board[:,i] == -1)
-        col_points = np.sum(board[:,i][board[:,i] > 0])
+        col_voltorbs = np.sum(board[i] == -1)
+        col_points = np.sum(board[i][board[i] > 0])
         col_hints.append((col_voltorbs, col_points))
-    return row_hints, col_hints
+    return col_hints, row_hints
