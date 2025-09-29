@@ -6,9 +6,9 @@ def generate_new_board(size):
     for i in range(size):
         for j in range(size):
             rand = random.random()
-            if rand < 0.3:
+            if rand < 0.1:
                 board[i][j] = -1  # Voltorb
-            elif rand < 0.7:
+            elif rand < 0.6:
                 board[i][j] = 1   # 1 point
             elif rand < 0.9:
                 board[i][j] = 2   # 2 points
