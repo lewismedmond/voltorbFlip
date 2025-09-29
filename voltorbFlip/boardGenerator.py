@@ -43,3 +43,4 @@ def draw_keys(col_keys, row_keys, GAME_SIZE, font, screen):
         pointTotal = font.render(str(score).zfill(2), True, (0,0,0))
         screen.blit(voltorbCount, ((GAME_SIZE) * 47 + 30, i*47 + 27))  # Positioning key in the right place
         screen.blit(pointTotal, ((GAME_SIZE) * 47 + 20, i*47+7))
+
