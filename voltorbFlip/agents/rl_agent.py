@@ -61,14 +61,14 @@ class RLPlayer():
         self.score = score
 
 
-    def update_weights(self, iteration):
-        alpha = 0.1
+    def update_weights(self):
+        alpha = 0.5
         for i, (col_keys, row_keys, action) in enumerate(self.move_sequence):
             key = (tuple(col_keys), tuple(row_keys), tuple(action))
             if key not in self.q_table:
                 self.q_table[key] = 1
             if self. score > 0:
-                self.q_table[key] = int(self.q_table + alpha * (self.score - self.q_table[key]))   # increment weights of selected tiles according to the score
+                self.q_table[key] = int(self.q_table[key] + alpha * (self.score - self.q_table[key]))   # increment weights of selected tiles according to the score
             else:
                 if i == len(self.move_sequence):
                     self.q_table[key] = int(self.q_table[key]/2)  # half the weight of the bomb selected
@@ -84,7 +84,7 @@ class RLPlayer():
         count = random.randrange(boundaries[len(boundaries)-1])
         for i, boundary in enumerate(boundaries):
             if(count <= boundary):   # randomly choose a tile to flip according to their relative weights
-                return coords[i]
+                return coords[i-1]
 
     #def sort_board(self):  
     #    sorted = False
