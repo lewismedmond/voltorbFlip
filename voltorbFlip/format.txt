@@ -1,0 +1,16 @@
+rl_player = RLAgent(GAME_SIZE)
+for i in range(num_of_games+1):
+    
+
+    if(i%(num_of_games/5) = 0):
+        rl_player.test_winrate()
+    
+    play_one_game()
+        env = generate_new_board()
+        while not game_over:
+            available_moves = env.available_moves()
+            next_move = rl_player.select_move(state, available_moves)
+            env.play_move(next_move)
+        
+        render_game()
+
