@@ -1,6 +1,20 @@
 import numpy as np
 import random
 
+
+class Board:
+    def __init__(self, size):
+        self.size = size
+        self.board = generate_new_board(size)
+        self.col_keys, self.row_keys = generate_keys(self.board)
+        self.available_moves = [(i,j) for i in range(size) for j in range(size)]
+        self.state = np.zeros((size, size), dtype=int)  # 0: unflipped, -1: voltorb, 1/2/3: points
+    def play(self, action):
+        self.available_moves.remove(action)
+        self.state[action] = self.board[action]
+        return self.board[action]
+
+
 def generate_new_board(size):
     board = np.zeros((size,size), dtype=int)
     for i in range(size):
@@ -31,16 +45,5 @@ def generate_keys(board):
     return col_keys, row_keys
 
 
-def draw_keys(col_keys, row_keys, GAME_SIZE, font, screen):
-    for i,(voltorb, score) in enumerate(col_keys):
-        voltorbCount = font.render(str(voltorb), True, (0,0,0))
-        pointTotal = font.render(str(score).zfill(2), True, (0,0,0))
-        screen.blit(voltorbCount, (i * 47 + 34, (GAME_SIZE) * 47 + 26))  # Positioning key in the right place
-        screen.blit(pointTotal, (i * 47 + 22, (GAME_SIZE) * 47 + 6))
 
-    for i,(voltorb, score) in enumerate(row_keys):
-        voltorbCount = font.render(str(voltorb), True, (0,0,0))
-        pointTotal = font.render(str(score).zfill(2), True, (0,0,0))
-        screen.blit(voltorbCount, ((GAME_SIZE) * 47 + 30, i*47 + 27))  # Positioning key in the right place
-        screen.blit(pointTotal, ((GAME_SIZE) * 47 + 20, i*47+7))
 

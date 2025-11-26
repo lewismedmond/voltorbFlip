@@ -1,4 +1,4 @@
-from voltorbflip.tile import Tile
+from tile import Tile
 import numpy as np
 import pygame
 

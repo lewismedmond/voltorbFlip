@@ -1,4 +1,3 @@
-from voltorbflip.tile import Tile
 import numpy as np
 import pygame
 import pickle
@@ -9,7 +8,8 @@ import random
 pygame.init()
 
 class RLPlayer():
-    def __init__(self, GAME_SIZE):       
+    def __init__(self, GAME_SIZE):
+        self.ALPHA = 0.1  # learning rate       
         q_table_file = "voltorbflip/q_table.pkl"
         if os.path.exists(q_table_file):
             with open(q_table_file, "rb") as f:  # loading dictionary of (board, state) -> weights
@@ -19,23 +19,33 @@ class RLPlayer():
             with open(q_table_file, "wb") as f:
                 pickle.dump(self.q_table, f)
 
-    def reset_game(self, GAME_SIZE):
-        self.player_board = np.zeros((GAME_SIZE, GAME_SIZE))
-        self.score = 1
-        self.move_sequence = []
+    def select_action(self, current_state, available_moves):
+        ## epsilon-greedy action selection. currently using random selection
+        return random.choice(available_moves)
+
+    def step(self, current_state, action, reward, next_state, available_moves):
+        ### update q-table using bellman equation
+        current_key = tuple(map(tuple, current_state.tolist()))
+        next_key = tuple(map(tuple, next_state.tolist()))
+        # bellman equation:
+        if(current_key not in self.q_table):
+            self.q_table[current_key] = {a: 0 for a in (available_moves + [action])}
+
+        if(next_key not in self.q_table):
+            self.q_table[next_key] = {a: 0 for a in available_moves}
+
+        #### need to decide on initial q values.
+        # currently everything will be set to 1 so without any rewards, the q values can never change
+
+        self.q_table[current_key][action] = self.q_table[current_key][action] + self.ALPHA * (reward + max([self.q_table[next_key][next_action] for next_action in available_moves]) - self.q_table[current_key][action])
+        pass
+
         
     def initialise_features(self, GAME_SIZE, col_keys, row_keys):
         self.row_keys = row_keys
         self.col_keys = col_keys
         #self.sort_keys() # sorting the player's key information to take advantage of identical boards up to permutation of rows/cols 
 
-    def select_move(self):
-        coords = np.argwhere(self.player_board == 0)
-        if coords.size == 0:
-            return None
-        chosen_move = self.choose_move_from(coords)
-        return tuple(coords[np.random.choice(len(coords))])
-    
     def play_move(self, chosen_move, currentBoard, all_sprites):
 
         self.move_sequence.append((self.col_keys, self.row_keys, chosen_move))
@@ -44,9 +54,7 @@ class RLPlayer():
         self.player_board[chosen_move[0]][chosen_move[1]] = tile_value
         self.update_current_info(chosen_move)
         self.score += tile_value
-        for sprite in all_sprites:
-            if(sprite.col == chosen_move[0] and sprite.row == chosen_move[1]):  # reveal chosen tile
-                sprite.reveal_tile()
+        
     
     def update_current_info(self, chosen_move):
         if self.player_board[chosen_move[0]][chosen_move[1]] == -1:
