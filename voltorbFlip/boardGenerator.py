@@ -9,10 +9,19 @@ class Board:
         self.col_keys, self.row_keys = generate_keys(self.board)
         self.available_moves = [(i,j) for i in range(size) for j in range(size)]
         self.state = np.zeros((size, size), dtype=int)  # 0: unflipped, -1: voltorb, 1/2/3: points
+        self.score_tiles_remaining = sum(row_value for row_value in sum([value > 1 for value in self.board]))
+        self.total_score_tiles = self.score_tiles_remaining.copy()
+    
     def play(self, action):
         self.available_moves.remove(action)
         self.state[action] = self.board[action]
-        return self.board[action]
+        if self.state[action] > 1:
+            self.score_tiles_remaining -= 1  # decrement the score tile counter when one is flipped
+        if self.score_tiles_remaining == 0: # if all score tiles have been flipped then the game is won
+            return 1
+        if self.state[action] == -1:
+            return -0.08
+        return 0.04  # voltorb hit
 
 
 def generate_new_board(size):

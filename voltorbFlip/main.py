@@ -10,8 +10,9 @@ import time
 import csv
 
 
-def play_one_game(GAME_SIZE, agent = None, render = False):
+def play_one_game(GAME_SIZE, games_played, agent = None, render = False,  score_log = []):
     
+    agent.set_score(0)
     board = Board(GAME_SIZE)
 
     if render:
@@ -33,19 +34,43 @@ def play_one_game(GAME_SIZE, agent = None, render = False):
         #play_human_game(GAME_SIZE, render)
     else:
         game_over = False
+        if board.total_score_tiles == 0:
+            game_over = True
         while not game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
-            game_over = play_one_move(agent, board, all_sprites)
+            game_over, action = play_one_move(agent, board)
 
             if render:
-                pygame.draw.rect(screen, (100, 255, 100), pygame.Rect(GAME_SIZE * 47,GAME_SIZE * 47, 50, 50))
+                #pygame.draw.rect(screen, (100, 255, 100), pygame.Rect(GAME_SIZE * 47,GAME_SIZE * 47, 50, 50))
                 #screen.blit(game_font.render(str(rl_player.score), True, (0, 0, 0)), (GAME_SIZE * 47 + 15,GAME_SIZE * 47 + 15))  # render player score
+                
+                for tile in all_sprites:
+                    if tile.col == action[0] and tile.row == action[1]:  # reveal chosen tile
+                        tile.reveal_tile()
+                        if tile.value == -1:  # if the tile selected is a voltorb, end the game
+                            game_over = True
+                
                 all_sprites.draw(screen) # Sprite rendering
                 clock.tick(30)  # Limit frame rate to 30 FPS
                 pygame.display.update()  # update screen
+        
+        score_log.append((board.score_tiles_remaining - board.total_score_tiles)/board.total_score_tiles if board.total_score_tiles > 0 else -1)
+        games_played += 1
+        if games_played % 1000 == 0:
+            agent.save_q_table("voltorbFlip/q_table.pkl")
+            
+            print(score_log[-10:])
+            print(games_played, "games played")
+            
+            with open("voltorbflip/scores.csv", "a", newline = "") as f:
+                writer = csv.writer(f)
+                writer.writerows([score_log])
+                score_log = []
+            
+
             
             
     
@@ -54,22 +79,19 @@ def play_one_move(agent, board, all_sprites = None):
         
         available_moves = board.available_moves
         if(len(available_moves) == 0):
-            return True
+            return True, None
         
-        current_state = board.state
+        current_state = board.state.copy()
         action = agent.select_action(current_state, available_moves)
-        if all_sprites is not None:
-            for sprite in all_sprites:
-                if(sprite.col == action[0] and sprite.row == action[1]):  # reveal chosen tile
-                    sprite.reveal_tile()
-
+        
+        #agent.score += board.board[action] if board.board[action] > 0 else 0  # update agent score if a point tile is selected
         
         reward = board.play(action)
-        agent.step(current_state, action, reward, board.state, board.available_moves)
-        for tile in all_sprites:
-                    if tile.col == action[0] and tile.row == action[1]:  # reveal chosen tile
-                        tile.reveal_tile()
-        return False
+        new_state = board.state
+        agent.step(current_state, action, reward, new_state, board.available_moves)
+        
+
+        return False, action
 
 
 #GAME_SIZE = 2  # set row/column count
@@ -80,11 +102,7 @@ def play_one_move(agent, board, all_sprites = None):
 
 #for i in range(10000):
 #
-#    if(i % 500 == 0 and i != 0):
-#        with open("voltorbflip/scores.csv", "a", newline = "") as f:
-#            writer = csv.writer(f)
-#            writer.writerows(score_log)
-#            score_log = []
+   
 
     
 
@@ -127,10 +145,7 @@ def play_one_move(agent, board, all_sprites = None):
 #                rl_player.update_weights()
 #                score_log.append([rl_player.score])
 
-        
 
-        
-        
 
         
 

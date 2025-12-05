@@ -21,24 +21,43 @@ class RLPlayer():
 
     def select_action(self, current_state, available_moves):
         ## epsilon-greedy action selection. currently using random selection
-        return random.choice(available_moves)
+        epsilon = random.randrange(0,1)
+        current_key = tuple(map(tuple, current_state.tolist()))
+
+        if(current_key not in self.q_table):
+            self.q_table[current_key] = {a: 0 for a in available_moves}
+            
+        if epsilon > 0.1:
+            return random.choice(available_moves)
+        else:
+            best_move = random.choice(available_moves)
+            best_move_value = self.q_table[current_key][best_move]
+            for a in available_moves:
+                if self.q_table[current_key][a] > best_move_value:   # select best_move according to the action that maximises q_table output
+                    best_move = a
+                    best_move_value = self.q_table[current_key][a]
+            return best_move
 
     def step(self, current_state, action, reward, next_state, available_moves):
         ### update q-table using bellman equation
         current_key = tuple(map(tuple, current_state.tolist()))
         next_key = tuple(map(tuple, next_state.tolist()))
-        # bellman equation:
-        if(current_key not in self.q_table):
-            self.q_table[current_key] = {a: 0 for a in (available_moves + [action])}
 
         if(next_key not in self.q_table):
             self.q_table[next_key] = {a: 0 for a in available_moves}
 
         #### need to decide on initial q values.
-        # currently everything will be set to 1 so without any rewards, the q values can never change
-
-        self.q_table[current_key][action] = self.q_table[current_key][action] + self.ALPHA * (reward + max([self.q_table[next_key][next_action] for next_action in available_moves]) - self.q_table[current_key][action])
+        # currently everything will be set to 0 so without any rewards, the q values can never change
+        if len(available_moves) == 0:
+            reward = 0
+        else:
+            reward += max([self.q_table[next_key][next_action] for next_action in available_moves])
+        self.q_table[current_key][action] = self.q_table[current_key][action] + self.ALPHA * (reward - self.q_table[current_key][action])
         pass
+
+    def save_q_table(self, filepath):
+        with open(filepath, "wb") as f:
+            pickle.dump(self.q_table, f)
 
         
     def initialise_features(self, GAME_SIZE, col_keys, row_keys):
