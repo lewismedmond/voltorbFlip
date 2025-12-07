@@ -25,18 +25,30 @@ class Board:
 
 
 def generate_new_board(size):
-    board = np.zeros((size,size), dtype=int)
-    for i in range(size):
-        for j in range(size):
-            rand = random.random()
-            if rand < 0.2:
-                board[i][j] = -1  # Voltorb
-            elif rand < 0.6:
-                board[i][j] = 1   # 1 point
-            elif rand < 0.8:
-                board[i][j] = 2   # 2 points
+    custom_board_generation = False
+    if not custom_board_generation: 
+        board = np.zeros((size,size), dtype=int)
+        for i in range(size):
+            for j in range(size):
+                rand = random.random()
+                if rand < 0.2:
+                    board[i][j] = -1  # Voltorb
+                elif rand < 0.6:
+                    board[i][j] = 1   # 1 point
+                elif rand < 0.8:
+                    board[i][j] = 2   # 2 points
+                else:
+                    board[i][j] = 3   # 3 points  
+    else: 
+        board = np.zeros((size,size), dtype=int)
+        bomb_index = random.randrange(size**2)
+        for index in range(size**2):
+            if index == bomb_index:
+                board[index//size][index%size] = -1
             else:
-                board[i][j] = 3   # 3 points    
+                board[index//size][index%size] = 2
+        #print(board)
+
     return board
 
 def generate_keys(board):

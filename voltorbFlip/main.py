@@ -59,7 +59,7 @@ def play_one_game(GAME_SIZE, games_played, agent = None, render = False,  score_
         
         score_log.append((board.score_tiles_remaining - board.total_score_tiles)/board.total_score_tiles if board.total_score_tiles > 0 else -1)
         games_played += 1
-        if games_played % 1000 == 0:
+        if games_played % 50000 == 0:
             agent.save_q_table("voltorbFlip/q_table.pkl")
             
             print(score_log[-10:])
@@ -75,20 +75,22 @@ def play_one_game(GAME_SIZE, games_played, agent = None, render = False,  score_
             
     
 def play_one_move(agent, board, all_sprites = None):
-        time.sleep(1)
         
+        time.sleep(1)
+
         available_moves = board.available_moves
         if(len(available_moves) == 0):
             return True, None
         
         current_state = board.state.copy()
-        action = agent.select_action(current_state, available_moves)
+        features = (tuple(board.col_keys), tuple(board.row_keys))
+        action = agent.select_action(current_state, available_moves, features)
         
         #agent.score += board.board[action] if board.board[action] > 0 else 0  # update agent score if a point tile is selected
         
         reward = board.play(action)
         new_state = board.state
-        agent.step(current_state, action, reward, new_state, board.available_moves)
+        agent.step(current_state, action, reward, new_state, board.available_moves, features)
         
 
         return False, action

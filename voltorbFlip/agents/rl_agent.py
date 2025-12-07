@@ -19,15 +19,14 @@ class RLPlayer():
             with open(q_table_file, "wb") as f:
                 pickle.dump(self.q_table, f)
 
-    def select_action(self, current_state, available_moves):
+    def select_action(self, current_state, available_moves, features):
         ## epsilon-greedy action selection. currently using random selection
+        training = False
         epsilon = random.randrange(0,1)
-        current_key = tuple(map(tuple, current_state.tolist()))
-
+        current_key = (tuple(map(tuple, current_state.tolist())) , features)
         if(current_key not in self.q_table):
             self.q_table[current_key] = {a: 0 for a in available_moves}
-            
-        if epsilon > 0.1:
+        if training and epsilon > 0.1:
             return random.choice(available_moves)
         else:
             best_move = random.choice(available_moves)
@@ -37,11 +36,16 @@ class RLPlayer():
                     best_move = a
                     best_move_value = self.q_table[current_key][a]
             return best_move
+                
 
-    def step(self, current_state, action, reward, next_state, available_moves):
+                
+            
+    
+
+    def step(self, current_state, action, reward, next_state, available_moves, features):
         ### update q-table using bellman equation
-        current_key = tuple(map(tuple, current_state.tolist()))
-        next_key = tuple(map(tuple, next_state.tolist()))
+        current_key = (tuple(map(tuple, current_state.tolist())) , features)
+        next_key = (tuple(map(tuple, next_state.tolist())) , features)
 
         if(next_key not in self.q_table):
             self.q_table[next_key] = {a: 0 for a in available_moves}
